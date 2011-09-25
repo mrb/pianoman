@@ -1,3 +1,31 @@
+/*---------------------------------------------------------------------------
+
+ This code is taken directly from the Redis github repository here:
+
+ https://github.com/antirez/redis/
+
+ and modified to make it easier to hook up to other libs.
+
+ The original code is:
+
+ Copyright (c) 2006-2009, Salvatore Sanfilippo
+ All rights reserved.
+
+ and carries with it the following disclaimer:
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ OF THE POSSIBILITY OF SUCH DAMAGE.
+
+---------------------------------------------------------------------------*/
+
 #include "redis-check-dump.h"
 
 /* Object types */
@@ -52,7 +80,7 @@
     exit(1); \
 }
 
-db_stat db_stats = {0, 0, 0, 0, 0};
+db_stat db_stats = {0, 0, 0, 0, 0, 0, 0};
 
 typedef struct {
     void *data;
@@ -347,6 +375,32 @@ int processDoubleValue(double** store) {
     return 1;
 }
 
+int keyMatch(char *key){
+    int i;
+    db_stats.total_keys++;
+
+    for(i = 0; i < db_stats.match_count; i++){
+        // Increment total key count (convenient location)
+        char *match = db_stats.matches[i];
+
+        size_t matchlength = strlen(match);
+        size_t keylength = strlen(key);
+
+        if(keylength >= matchlength){
+            char comp[matchlength];
+            strncpy(comp, key, matchlength);
+
+            comp[matchlength] = '\0';
+
+            size_t complength = sizeof(comp);
+            if(strcmp(match, comp)==0){
+                db_stats.match_counts[i] += 1;
+            };
+        }
+    };
+    return 0;
+};
+
 int loadPair(entry *e) {
     uint32_t offset = CURR_OFFSET;
     uint32_t i;
@@ -355,6 +409,7 @@ int loadPair(entry *e) {
     char *key;
     if (processStringObject(&key)) {
         e->key = key;
+        keyMatch(key);
     } else {
         SHIFT_ERROR(offset, 
             "Error reading entry key");
@@ -641,7 +696,8 @@ void process() {
     }
 }
 
-void processDumpFile(char *filename){
+void processDumpFile(int argc, char **argv){
+    char *filename = argv[1];
     int fd;
     off_t size;
     struct stat stat;
@@ -666,7 +722,7 @@ void processDumpFile(char *filename){
         ERROR("Cannot mmap: %s\n", filename);
     }
 
-      /* Initialize static vars */
+    /* Initialize static vars */
     positions[0].data = data;
     positions[0].size = size;
     positions[0].offset = 0;
@@ -690,6 +746,18 @@ void processDumpFile(char *filename){
     R_NegInf = -1.0/R_Zero;
     R_Nan = R_Zero/R_Zero;
 
+    if (argc > 2){
+        int i = 2;
+        int matchc = 0;
+        while(argv[i]){
+            db_stats.matches[matchc] = argv[i];
+            db_stats.match_counts[matchc] = 0;
+            matchc++;
+            i++;
+        }
+        db_stats.match_count = matchc;
+    }
+
     process();
 
     munmap(data, size);
@@ -697,5 +765,25 @@ void processDumpFile(char *filename){
 }
 
 void printDbStats(){
-    printf("\n\nKey Space:\n\nStrings: %i\nLists: %i\nSets: %i\nZsets: %i\nHashes: %i\n\n", db_stats.strings, db_stats.lists, db_stats.sets, db_stats.zsets, db_stats.hashes);
+    float ftotal = (float)db_stats.total_keys;
+    printf("\nKey Space:\n\n");
+    printf("Strings: %i (%.2f%%)\n", db_stats.strings,
+        ((float)db_stats.strings/ftotal*100.00));
+    printf("Lists: %i (%.2f%%)\n", db_stats.lists,
+        ((float)db_stats.lists/ftotal*100.00));
+    printf("Sets: %i (%.2f%%)\n", db_stats.sets,
+        ((float)db_stats.sets/ftotal*100.00));
+    printf("Zsets: %i (%.2f%%)\n", db_stats.zsets,
+        ((float)db_stats.zsets/ftotal*100.00));
+    printf("Hashes: %i (%.2f%%)\n", db_stats.hashes,
+        ((float)db_stats.hashes/ftotal*100.00));
+
+    printf("\nMatch Stats:\n\n");
+    int i;
+    for(i = 0; i < db_stats.match_count; i++){
+        float fmc = (float)db_stats.match_counts[i];
+        printf("%i) %s %.2f (%.2f%%)\n", i, db_stats.matches[i],
+            fmc, ((fmc/ftotal)*100.00));
+    }
+    printf("\nTotal Keys: %i\n\n", db_stats.total_keys);
 }

@@ -2,16 +2,11 @@
 
 int main(int argc, char **argv) {
     if (argc <= 1) {
-        printf("Usage: %s <dump.rdb>\n", argv[0]);
+        printf("Usage: %s <dump.rdb> <match1> <match2> ...\n", argv[0]);
         exit(0);
-    } else if (argc > 2){
-        int i = 2;
-        while(argv[i++]){
-            printf("num %i\n\n",i);
-        }
     };
 
-    processDumpFile(argv[1]);
+    processDumpFile(argc, argv);
     printDbStats();
 
     return 0;

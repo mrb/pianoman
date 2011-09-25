@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-I.
-PROGNAME = pianoman
+PROGNAME = pm
 OBJ = lzf_c.o lzf_d.o redis-check-dump.o pianoman.o
 
 all: $(OBJ)

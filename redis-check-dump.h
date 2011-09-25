@@ -16,7 +16,11 @@ typedef struct {
     int sets;
     int zsets;
     int hashes;
+    int total_keys;
+    size_t match_count;
+    char *matches[25];
+    int match_counts[25];
 } db_stat;
 
-void processDumpFile(char *filename);
+void processDumpFile(int argc, char **argv);
 void printDbStats();
