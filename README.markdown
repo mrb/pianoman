@@ -89,6 +89,12 @@ somewhere, and you might not want to spin up a server to see what's happening.
 * You want to continuously measure qualities of your key space and don't always
 want to keep all of it in Redis itself.
 
+DISCLAIMER
+----------
+
+There's no reason this code should damage your data set, but you should not run
+this on your live data.  Please run it on a backup until it is tested extensively.
+
 Inspiration
 -----------
 
