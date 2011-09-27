@@ -26,7 +26,7 @@ Here's the current output, with some matchers:
 
     > ./pm ~/Projects/redis/dump.rdb wu cla rz
 
-    ==== Processed 8 valid opcodes (in 143 bytes) ==================================
+    ==== Processed 8 valid opcodes (in 143 bytes) =============================
 
     Key Space:
 
@@ -43,6 +43,7 @@ Here's the current output, with some matchers:
     2) rz 1.00 (16.67%)
 
     Total Keys: 6
+    Total Expires: 0
 
 
 Performance
@@ -51,7 +52,7 @@ Performance
 Decent. Here's a timed output on a larger (629MB) db on my macbook:
 
     ~/Projects/pianoman[master*]: time ./pm ~/gooddump.rdb api dashboard
-    ==== Processed 408117 valid opcodes (in 659980364 bytes) =======================
+    ==== Processed 408117 valid opcodes (in 659980364 bytes) ==================
 
     Key Space:
 
@@ -67,6 +68,7 @@ Decent. Here's a timed output on a larger (629MB) db on my macbook:
     1) dashboard 78297.00 (19.19%)
 
     Total Keys: 408115
+    Total Expires: 71108
 
     real	0m9.109s
     user	0m8.264s
