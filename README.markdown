@@ -80,6 +80,15 @@ Installation
 
 make all
 
+Why?
+----
+
+* 'keys *' is not a safe command to run on a large production Redis data set.
+* If your server is having problems, you hopefully have a copy of your .rdb file
+somewhere, and you might not want to spin up a server to see what's happening.
+* You want to continuously measure qualities of your key space and don't always
+want to keep all of it in Redis itself.
+
 Inspiration
 -----------
 
