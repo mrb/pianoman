@@ -80,7 +80,7 @@
     exit(1); \
 }
 
-db_stat db_stats = {0, 0, 0, 0, 0, 0, 0};
+db_stat db_stats = {0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef struct {
     void *data;
@@ -538,6 +538,7 @@ entry loadEntry() {
         if (e.type == REDIS_EXPIRETIME) {
             if (!processTime()) return e;
             if (!loadType(&e)) return e;
+            db_stats.total_expires++;
         }
 
         offset[1] = CURR_OFFSET;
@@ -785,5 +786,6 @@ void printDbStats(){
         printf("%i) %s %.2f (%.2f%%)\n", i, db_stats.matches[i],
             fmc, ((fmc/ftotal)*100.00));
     }
-    printf("\nTotal Keys: %i\n\n", db_stats.total_keys);
+    printf("\nTotal Keys: %i\n", db_stats.total_keys);
+    printf("Total Expires: %i\n\n", db_stats.total_expires);
 }

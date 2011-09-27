@@ -17,6 +17,7 @@ typedef struct {
     int zsets;
     int hashes;
     int total_keys;
+    int total_expires;
     size_t match_count;
     char *matches[25];
     int match_counts[25];
