@@ -28,59 +28,7 @@
 
 #include "redis-check-dump.h"
 
-/* Object types */
-#define REDIS_STRING 0
-#define REDIS_LIST 1
-#define REDIS_SET 2
-#define REDIS_ZSET 3
-#define REDIS_HASH 4
-
-/* Objects encoding. Some kind of objects like Strings and Hashes can be
- * internally represented in multiple ways. The 'encoding' field of the object
- * is set to one of this fields for this object. */
-#define REDIS_ENCODING_RAW 0    /* Raw representation */
-#define REDIS_ENCODING_INT 1    /* Encoded as integer */
-#define REDIS_ENCODING_ZIPMAP 2 /* Encoded as zipmap */
-#define REDIS_ENCODING_HT 3     /* Encoded as an hash table */
-
-/* Object types only used for dumping to disk */
-#define REDIS_EXPIRETIME 253
-#define REDIS_SELECTDB 254
-#define REDIS_EOF 255
-
-/* Defines related to the dump file format. To store 32 bits lengths for short
- * keys requires a lot of space, so we check the most significant 2 bits of
- * the first byte to interpreter the length:
- *
- * 00|000000 => if the two MSB are 00 the len is the 6 bits of this byte
- * 01|000000 00000000 =>  01, the len is 14 byes, 6 bits + 8 bits of next byte
- * 10|000000 [32 bit integer] => if it's 01, a full 32 bit len will follow
- * 11|000000 this means: specially encoded object will follow. The six bits
- *           number specify the kind of object that follows.
- *           See the REDIS_RDB_ENC_* defines.
- *
- * Lenghts up to 63 are stored using a single byte, most DB keys, and may
- * values, will fit inside. */
-#define REDIS_RDB_6BITLEN 0
-#define REDIS_RDB_14BITLEN 1
-#define REDIS_RDB_32BITLEN 2
-#define REDIS_RDB_ENCVAL 3
-#define REDIS_RDB_LENERR UINT_MAX
-
-/* When a length of a string object stored on disk has the first two bits
- * set, the remaining two bits specify a special encoding for the object
- * accordingly to the following defines: */
-#define REDIS_RDB_ENC_INT8 0        /* 8 bit signed integer */
-#define REDIS_RDB_ENC_INT16 1       /* 16 bit signed integer */
-#define REDIS_RDB_ENC_INT32 2       /* 32 bit signed integer */
-#define REDIS_RDB_ENC_LZF 3         /* string compressed with FASTLZ */
-
-#define ERROR(...) { \
-    printf(__VA_ARGS__); \
-    exit(1); \
-}
-
-db_stat db_stats = {0, 0, 0, 0, 0, 0, 0, 0};
+db_stat db_stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef struct {
     void *data;
@@ -673,7 +621,9 @@ void process() {
 
     /* because there is another potential error,
      * print how many valid ops we have processed */
-    printValid(num_valid_ops, num_valid_bytes);
+    //printValid(num_valid_ops, num_valid_bytes);
+    db_stats.num_valid_ops = num_valid_ops;
+    db_stats.num_valid_bytes = num_valid_bytes;
 
     /* expect an eof */
     if (entry.type != REDIS_EOF) {
@@ -767,6 +717,12 @@ void processDumpFile(int argc, char **argv){
 
 void printDbStats(){
     float ftotal = (float)db_stats.total_keys;
+    printf("\nData:\n\n");
+    printf("Valid Ops: %llu\n",
+        (unsigned long long)db_stats.num_valid_ops);
+    printf("Valid Bytes: %llu\n",
+        (unsigned long long)db_stats.num_valid_bytes);
+
     printf("\nKey Space:\n\n");
     printf("Strings: %i (%.2f%%)\n", db_stats.strings,
         ((float)db_stats.strings/ftotal*100.00));
@@ -778,14 +734,14 @@ void printDbStats(){
         ((float)db_stats.zsets/ftotal*100.00));
     printf("Hashes: %i (%.2f%%)\n", db_stats.hashes,
         ((float)db_stats.hashes/ftotal*100.00));
+    printf("Total Keys: %i\n", db_stats.total_keys);
+    printf("Total Expires: %i (%.2f%%)\n", db_stats.total_expires,
+        ((float)db_stats.total_expires/ftotal*100.00));
 
     printf("\nMatch Stats:\n\n");
     int i;
     for(i = 0; i < db_stats.match_count; i++){
         float fmc = (float)db_stats.match_counts[i];
-        printf("%i) %s %.2f (%.2f%%)\n", i, db_stats.matches[i],
-            fmc, ((fmc/ftotal)*100.00));
-    }
-    printf("\nTotal Keys: %i\n", db_stats.total_keys);
-    printf("Total Expires: %i\n\n", db_stats.total_expires);
-}
+        printf("%i) %s %i (%.2f%%)\n", i, db_stats.matches[i],
+            (int)fmc, ((fmc/ftotal)*100.00));
+    }}
