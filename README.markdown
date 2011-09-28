@@ -25,8 +25,10 @@ Here's a tiny redis database:
 Here's the current output, with some matchers:
 
     > ./pm ~/Projects/redis/dump.rdb wu cla rz
+    Data:
 
-    ==== Processed 8 valid opcodes (in 143 bytes) =============================
+    Valid Ops: 8
+    Valid Bytes: 143
 
     Key Space:
 
@@ -35,6 +37,8 @@ Here's the current output, with some matchers:
     Sets: 1 (16.67%)
     Zsets: 1 (16.67%)
     Hashes: 1 (16.67%)
+    Total Keys: 6
+    Total Expires: 0 (0.0%)
 
     Match Stats:
 
@@ -42,33 +46,31 @@ Here's the current output, with some matchers:
     1) cla 1.00 (16.67%)
     2) rz 1.00 (16.67%)
 
-    Total Keys: 6
-    Total Expires: 0
-
-
 Performance
 -----------
 
 Decent. Here's a timed output on a larger (629MB) db on my macbook:
 
     ~/Projects/pianoman[master*]: time ./pm ~/gooddump.rdb api dashboard
-    ==== Processed 408117 valid opcodes (in 659980364 bytes) ==================
+    Data:
+
+    Valid Ops: 408117
+    Valid Bytes: 659980364
 
     Key Space:
 
-    Strings: 140810 (34.50%)
-    Lists: 10365 (2.54%)
-    Sets: 3261 (0.80%)
-    Zsets: 1 (0.00%)
-    Hashes: 253678 (62.16%)
+    Strings: 140810 (34.503%)
+    Lists: 10365 (2.540%)
+    Sets: 3261 (0.799%)
+    Zsets: 1 (0.000%)
+    Hashes: 253678 (62.158%)
+    Total Keys: 408115
+    Total Expires: 71108 (17.424%)
 
     Match Stats:
 
-    0) api 253678.00 (62.16%)
-    1) dashboard 78297.00 (19.19%)
-
-    Total Keys: 408115
-    Total Expires: 71108
+    0) api 253678 (62.158%)
+    1) dashboard 78297 (19.185%)
 
     real	0m9.109s
     user	0m8.264s
