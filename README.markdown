@@ -1,7 +1,7 @@
 pianoman
 --------
 
-Redis .rdb dump file analyzer in C
+A Redis .rdb dump file analyzer in C
 
 Functionality
 -------------
