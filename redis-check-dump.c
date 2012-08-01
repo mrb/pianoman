@@ -449,6 +449,7 @@ int loadPair(entry *e) {
         return 0;
     }
     /* because we're done, we assume success */
+    free(key);
     e->success = 1;
     return 1;
 }
@@ -748,4 +749,5 @@ void printDbStats(){
         float fmc = (float)db_stats.match_counts[i];
         printf("%i) %s %i (%.2f%%)\n", i, db_stats.matches[i],
             (int)fmc, ((fmc/ftotal)*100.00));
-    }}
+    }
+}
