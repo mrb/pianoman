@@ -340,7 +340,6 @@ int keyMatch(char *key){
 
             comp[matchlength] = '\0';
 
-            size_t complength = sizeof(comp);
             if(strcmp(match, comp)==0){
                 db_stats.match_counts[i] += 1;
             };
