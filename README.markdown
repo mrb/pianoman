@@ -80,7 +80,9 @@ Decent. Here's a timed output on a larger (629MB) db on my macbook:
 Installation
 ------------
 
-make all
+	git clone https://github.com/mrb/pianoman.git
+	cd pianoman
+	make all
 
 Why?
 ----
