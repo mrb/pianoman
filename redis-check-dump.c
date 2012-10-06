@@ -704,11 +704,18 @@ void processDumpFile(int argc, char **argv){
     if (argc > 2){
         int i = 2;
         int matchc = 0;
-        while(argv[i]){
+        while (argv[i] && i < 27){
             db_stats.matches[matchc] = argv[i];
             db_stats.match_counts[matchc] = 0;
             matchc++;
             i++;
+        }
+        if (i == 27 && argv[i]) {
+            printf("Warning too many arguments; ignoring keys: ");
+            while (argv[i]) {
+                printf("%s ", argv[i++]);
+            }
+            printf("\n");
         }
         db_stats.match_count = matchc;
     }
