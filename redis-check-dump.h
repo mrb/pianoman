@@ -13,6 +13,8 @@
 #include <limits.h>
 #include "lzf.h"
 
+#define MAX_MATCH_KEYS 25
+
 /* Object types */
 #define REDIS_STRING 0
 #define REDIS_LIST 1
