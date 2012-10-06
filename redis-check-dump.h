@@ -84,8 +84,8 @@ typedef struct {
     uint64_t num_errors;
     uint64_t num_valid_ops;
     uint64_t num_valid_bytes;
-    char *matches[25];
-    int match_counts[25];
+    char *matches[MAX_MATCH_KEYS];
+    int match_counts[MAX_MATCH_KEYS];
 } db_stat;
 
 void processDumpFile(int argc, char **argv);
