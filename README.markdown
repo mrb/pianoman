@@ -106,5 +106,6 @@ Inspiration
 
 Credits
 -------
+- October 7, 2012 - ripcurld00d added better build instructions and overflow checking for command line args
 
 (c) 2011 Michael R. Bernstein unless noted
